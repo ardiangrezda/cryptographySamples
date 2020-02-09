@@ -4,7 +4,7 @@
 int main()
 {
 	int n;
-	printf("Te ipet numri: ");
+	printf("Input number: ");
 	scanf("%d", &n);
 	char *Composites = new char[n];
 	int i, j;
@@ -20,7 +20,7 @@ int main()
 				Composites[j] = 1;
 		}
 	}
-	printf("Numrat e thjeshte jane: \n");
+	printf("Simple numbers are: \n");
 	j = 1;
 	int ch;
 	for (i = 2; i < n; i++)
@@ -31,7 +31,7 @@ int main()
 			j++;
 			if ((j % 200) == 0)
 			{
-				printf("\n\aShtyp qfaredo karakteri <ESC> per dalje\n");
+				printf("\n\aPress any key or <ESC> for exit\n");
 				ch = getch();
 				if (ch == 0x1b)
 				{
