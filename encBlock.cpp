@@ -1,16 +1,12 @@
-/* Shembull i shifrimit te blloqeve te bajtave
-	Algoritmi i enkriptimit si file hyres e merr file-in origjinal
-	si text file, ndersa ne dalje fitohet file i enkriptuar
-	Ndersa algoritmi i dekriptimit si hyrje e merr file-in e enkriptuar 
-	dhe pas dekriptimit fitohet file-i i dekriptuar
-	File origjinal (si file hyres i algoritmit te enkriptuar) duhet te jete
-	i identik me file-in dales te dekriptuar (file-i dales i 
-	algoritmit te dekriptuar)
-	File i enkriptuar do te kete ekstenzionin .enc, ndersa 
-	file i dekriptuar do te kete ekstensionin .dcp
+/* Example of encryption of blocks of bytes
+	Encryption algorithm as reads input original file (as text file) and
+	at the exit is obtained encrypted file
+	Decrytion algorithm reads encrypted file and after decrytion decrypted file is obtained
+	Encrypted file should have extension .enc, whereas
+	decrypted file should have extension .dcp
 
-  	Sintaksa:	shembulli_27 encBllok inputFile 
-				shembulli_27 decBllok inputFile 
+  	Syntax:	encBlock encBllok inputFile 
+				encBlock decBllok inputFile 
 	
 	Ketu merret nje bllok prej n bajtave dhe bajti 0 zevendesohet me 
 	bajtin n-1, bajti 1 me n-2, bajti 2 me n-3, etj
