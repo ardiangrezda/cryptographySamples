@@ -3,9 +3,9 @@ void EEA(int a, int b, int *d, int *x, int *y);
 int main()
 {
 	int a, b;
-	printf("Te ipet a: ");
+	printf("Input a: ");
 	scanf("%d", &a);
-	printf("Te ipet b: ");
+	printf("Input b: ");
 	scanf("%d", &b);
 	int d, x, y;
 	EEA(a, b, &d, &x, &y);
