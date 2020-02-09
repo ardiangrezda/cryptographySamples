@@ -1,0 +1,59 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Kripto_1 - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"Release/Kripto_1.res" /d "NDEBUG" /d "_AFXDLL" "D:\studentet\Siguria e te dhenave\C++\Kripto_1\Kripto_1.rc"" 
+Creating temporary file "C:\WINDOWS\TEMP\RSPE222.TMP" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Release/Kripto_1.pch" /Yu"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\studentet\Siguria e te dhenave\C++\Kripto_1\Kripto_1.cpp"
+"D:\studentet\Siguria e te dhenave\C++\Kripto_1\Kripto_1Dlg.cpp"
+"D:\studentet\Siguria e te dhenave\C++\Kripto_1\Qelesi.cpp"
+"D:\studentet\Siguria e te dhenave\C++\Kripto_1\QelesiPolialfabetik.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPE222.TMP" 
+Creating temporary file "C:\WINDOWS\TEMP\RSPE223.TMP" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Release/Kripto_1.pch" /Yc"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\studentet\Siguria e te dhenave\C++\Kripto_1\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPE223.TMP" 
+Creating temporary file "C:\WINDOWS\TEMP\RSPE224.TMP" with contents
+[
+/nologo /subsystem:windows /incremental:no /pdb:"Release/Kripto_1.pdb" /machine:I386 /out:"Release/Kripto_1.exe" 
+".\Release\Kripto_1.obj"
+".\Release\Kripto_1Dlg.obj"
+".\Release\Qelesi.obj"
+".\Release\QelesiPolialfabetik.obj"
+".\Release\StdAfx.obj"
+".\Release\Kripto_1.res"
+]
+Creating command line "link.exe @C:\WINDOWS\TEMP\RSPE224.TMP"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+StdAfx.cpp
+Compiling...
+Kripto_1.cpp
+Kripto_1Dlg.cpp
+D:\studentet\Siguria e te dhenave\C++\Kripto_1\Kripto_1Dlg.cpp(357) : warning C4018: '>' : signed/unsigned mismatch
+D:\studentet\Siguria e te dhenave\C++\Kripto_1\Kripto_1Dlg.cpp(365) : warning C4018: '<' : signed/unsigned mismatch
+D:\studentet\Siguria e te dhenave\C++\Kripto_1\Kripto_1Dlg.cpp(437) : warning C4018: '>' : signed/unsigned mismatch
+Qelesi.cpp
+QelesiPolialfabetik.cpp
+D:\studentet\Siguria e te dhenave\C++\Kripto_1\QelesiPolialfabetik.cpp(61) : warning C4018: '<' : signed/unsigned mismatch
+D:\studentet\Siguria e te dhenave\C++\Kripto_1\QelesiPolialfabetik.cpp(182) : warning C4018: '<' : signed/unsigned mismatch
+Generating Code...
+Linking...
+
+
+
+<h3>Results</h3>
+Kripto_1.exe - 0 error(s), 5 warning(s)
+</pre>
+</body>
+</html>
