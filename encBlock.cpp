@@ -7,10 +7,9 @@
 
   	Syntax:	encBlock encBllok inputFile 
 				encBlock decBllok inputFile 
+	Here n block are taken as input and byte 0 is replaced by byte n-1,
+	byte 1 with byte n -1, byte 2 with byte n - 3, etc
 	
-	Ketu merret nje bllok prej n bajtave dhe bajti 0 zevendesohet me 
-	bajtin n-1, bajti 1 me n-2, bajti 2 me n-3, etj
-
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,16 +17,14 @@
 #include <ctype.h>
 #include <conio.h>
 
-// funksioni i enkriptimit i cili si argumente hyrese ka pointerin ne FILE, 
-// emrin e datotekes dhe numrin e blloqeve. Ky funksion kthen 0 nese 
-// qdo gje perfundon ne rregull, perndryshe nese ka ndonje 
-// gabim ky funksion kthen 1
+// encryption function which as input arguments takes pointer to a FILE,
+// file name and number of blocks. Function returns 0 if everything goes OK, 
+// otherwise if something goes wrong, it returns 1
 int encBllok(FILE *inputFile, char *FileName, int bllok);
 
-// funksioni i dekriptimit i cili si argumente hyrese ka pointerin ne FILE ,
-// emrin e datotekes dhe numrin e blloqeve. Ky funksion kthen 0 nese 
-// qdo gje perfundon ne rregull, perndryshe nese ka ndonje gabim 
-// ky funksion kthen 1
+// decryption function which as input arguments takes pointer to a FILE,
+// file name and number of blocks. Function returns 0 if everything goes OK, 
+// otherwise if something goes wrong, it returns 1
 int decBllok(FILE *inputFile, char *FileNameEncrypted, int bllok);
 
 int CheckIfNumber();
@@ -36,73 +33,73 @@ void SwapBytes(char *szBuffer, int numread);
 
 int main( int argc, char *argv[])
 {
-	// numri i argumenteve duhet te jete 3
+	// number of arguments must be 4
 	if (argc != 4)
 	{
-		printf("Numri i argumenteve te dhena nga shfrytezuesi duhet te jete 4. \n");
-		printf("Sintaksa\t: shembulli_27 encBllok inputFile bllok\n");
-		printf("ose\t\t: shembulli_27 decBllok inputFile bllok\n");
+		printf("Number of arguments should be 4. \n");
+		printf("Syntax\t: encBlock encBllok inputFile bllok\n");
+		printf("or\t\t: encBlock decBllok inputFile bllok\n");
 		exit(1);
 	}
-	// argumentet 1 dhe 2 konvertohen ne shkronja te medha
+	// arguments 1 and 2 should be converted into capital letters
 	argv[1] = strupr(argv[1]);
 	argv[2] = strupr(argv[2]);
 
-	// nese argumenti i dyte nuk eshte ENCBLLOK ose DECBLLOK, 
-	// programi perfundon
+	// if the second argument is not ENCBLLOK or DECBLLOK, 
+	// the program will terminate
 	if ((strcmp(argv[1], "ENCBLLOK") != 0 ) && (strcmp(argv[1], "DECBLLOK") != 0))
 	{
-		printf("Argumenti i dyte duhet te jete ENCBLLOK ose DECBLLOK\n");
+		printf("The second argument must be ENCBLLOK or DECBLLOK\n");
 		exit(1);
 	}
 	
-	// verifikojme a ekziston datoteka e cila eshte marre si parametri i dyte (argv[2])
+	// verify if the file exists as second parameter
 	FILE *inputFile;
 	if((inputFile = fopen( argv[2], "r+b" )) == NULL )
 	{
-		printf("Datoteka %s nuk mund te hapet apo nuk ekziston!\n", argv[2]);
+		printf("File %s does not exist or could not be opened!\n", argv[2]);
 		exit(1);		
 	}
 	long fileSize;
-	// percakto madhesine e file-it
+	// determine file size
 	fseek(inputFile, 0, SEEK_END);
 	fileSize = ftell(inputFile);
-	// mbyllim datoteken
+	// close the file
 	fclose(inputFile);
 	unsigned int i;
-	// verifiko a eshte argumenti i katert numer
-	// e nese nuk eshte numer, atehere pason dalja nga programi
+	// verify if the forth argument is a number,
+	// and if it not, then the program will terminate
 	for (i = 0; i < strlen(argv[3]); i++)
 	{
 		if (!isdigit(argv[3][i]))
 		{
-			printf("Argumenti i katert duhet te jete numer\n");
+			printf("The forth argument should be a number\n");
  			exit(1);
 		}
 	}
-	// ekstrakto bllokun nga argumenti i katert
+	// extract the block from the forth argument
 	int bllok;
 	sscanf(argv[3], "%d", &bllok);
 	if (fileSize < bllok)
 	{
-		printf("Madhesia e file-it eshte me e madhe se blloku i bajtave\n");
+		printf("File size is smaller then block of bytes!!\n");
 		exit(1);
 	}
-	// Nese argumenti i dyte eshte ENCBLLOK, atehere thirret funksioni encBllok
+	// If the second argument is ENCBLLOK, then function encBllok is called
 	if (!strcmp(argv[1], "ENCBLLOK"))
 	{
 		if (encBllok(inputFile, argv[2], bllok))
 		{
-			printf("Kemi nje gabim ne enkriptim!\n");
+			printf("There was an error in ecryption!\n");
 			exit(1);
 		}
 	}
-	// Nese argumenti i dyte eshte DECBLLOK, atehere thirret funksioni decBllok
+	// if the second argument is DECBLLOK, then function decBllok is called
 	else if (!strcmp(argv[1], "DECBLLOK"))
 	{
 		if (decBllok(inputFile, argv[2], bllok))
 		{
-			printf("Kemi nje gabim ne decriptim!\n");
+			printf("There was an error in decryption!\n");
 			exit(1);
 		}
 	}
@@ -115,39 +112,36 @@ int encBllok(FILE *inputFile, char *FileName, int bllok)
 {
 	char FileNameEncrypted[200], FileNameOnly[200];
 	char *Extension;
-	// Gjen paraqitjen e fundit te pikes ne emrin e datotekes dhe rezultatin e ruan
-	// ne variablen Extension
-	Extension = strrchr(FileName,'.');
+	// Finds the last apperance of the dot (.) in the filename
+	// and saves it into Extension variable	Extension = strrchr(FileName,'.');
 	Extension = strupr(Extension);
 
-	// nese variabla Extension eshte .ENC atehere ky funksion i kthehet funksionit main()
+	// if variable Extension is .ENC, then will return to main()
 	if (!strcmp(Extension, ".ENC"))
 	{
-		printf("Datoteka hyrese duhet te mos kete ekstenzion .ENC!\n");
+		printf("Input file should not have extension .ENC!\n");
 		return 1;
 	}
 	
 	if((inputFile = fopen(FileName, "r+b" )) == NULL )
 	{
-		printf("Datoteka origjinale nuk mund te hapet\n");
+		printf("The original file could not be opeened\n");
 		return 1;		
 	}
 
-	// kopjo karakteret prej variables FileName ne FileNameOnly. 
-	// Kopjimi behet vetem deri te 
-	// paraqitja e fundit e pikes ne variablen FileName
+	// copy characters from FileName to FileNameOnly. 
+	// the coping is done until the last occurency of dot (.) in variable FileName
 	strncpy(FileNameOnly, FileName, Extension - FileName);
 
-	// variabla FileNameOnly perfundon me '\0'
+	// variable FileNameOnly ends with '\0'
 	FileNameOnly[Extension - FileName] = '\0';
-	// variabla FileNameEncrypted kopjon vetem emrin e datotekes, por i shtohet edhe 
-	// ekstenzioni .ENC
+	// variable FileNameEncrypted copies only name of the file, but it is appended by extension .ENC
 	sprintf(FileNameEncrypted, "%s.ENC", FileNameOnly);
 
 	FILE *EncryptedFile;
 	if ((EncryptedFile = fopen(FileNameEncrypted, "w+b")) == NULL)
 	{
-		printf("Datoteka e encryptuar nuk mund te hapet\n");
+		printf("Encrypted file could not be opened\n");
 		return 1;
 	}
 	
@@ -161,7 +155,7 @@ int encBllok(FILE *inputFile, char *FileName, int bllok)
 		SwapBytes(szBuffer, numread);
 		numwritten = fwrite(szBuffer, sizeof(char), numread, EncryptedFile);
 	}
-	// mbyllet datoteken hyrese dhe datoteken e enkriptuar
+	// files are closed
 	szBuffer = 0;
 	delete [] szBuffer;
 	fclose(inputFile);
@@ -176,17 +170,16 @@ int decBllok(FILE *inputFile, char *FileNameEncrypted, int bllok)
 	char *Extension;
 	Extension = strrchr(FileNameEncrypted,'.');
 	Extension = strupr(Extension);
-	// datoteka hyrese apo e enkriptuar duhet te kete ekstenzionin .ENC
-	// perndryshe funksioni perfundon
+	// input file should have extension .ENC, otherwise will return
 	if (strcmp(Extension, ".ENC"))
 	{
-		printf("Datoteka hyrese e enkriptuar duhet te kete ekstenzionin .ENC!\n");
+		printf("Input file should have extension .ENC!\n");
 		return 1;
 	}
 
 	if((inputFile = fopen(FileNameEncrypted, "r+b" )) == NULL )
 	{
-		printf("Datoteka e enkriptuar nuk mund te hapet\n");
+		printf("Encrypted file could not be opened\n");
 		return 1;		
 	}
 	
@@ -197,10 +190,10 @@ int decBllok(FILE *inputFile, char *FileNameEncrypted, int bllok)
 	FILE *DecryptedFile;
 	if ((DecryptedFile = fopen(FileNameDecrypted, "w+b")) == NULL)
 	{
-		printf("Datoteka e dekriptuar nuk mund te hapet\n");
+		printf("Decrypted file could not be opeend\n");
 		return 1;
 	}
-	// ch- karakteri hyres, ch1- karakteri i dekriptuar
+	// ch- input character, ch1- decrypted character
 	int numread, numwritten;
 	char *szBuffer = new char [bllok];
 	while (!feof(inputFile))
