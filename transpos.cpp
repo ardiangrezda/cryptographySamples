@@ -11,51 +11,49 @@ int decrypttranspos(FILE *inputFile, char *FileName);
 
 int main( int argc, char *argv[])
 {
-	// numri i argumenteve duhet te jete 3
+	// the number of arguments should be 3
 	if (argc != 3)
 	{
-		printf("Numri i argumenteve te dhena nga shfrytezuesi duhet te jete 3. \n");
-		printf("Sintaksa\t: shembulli_23 encryptTransposition inputFile\n");
-		printf("ose\t\t: shembulli_23 decryptTransposition inputFile\n");
+		printf("The number of arguments should be 3. \n");
+		printf("Syntax\t: transpos encryptTransposition inputFile\n");
+		printf("or\t\t: transpos decryptTransposition inputFile\n");
 		exit(1);
 	}
-	// argumentet 1 dhe 2 konvertohen ne shkronja te medha
+
 	argv[1] = strupr(argv[1]);
 	argv[2] = strupr(argv[2]);
 
-	// nese argumenti i dyte nuk eshte ENCRYPTTRANSPOSITION ose DECRYPTTRANSPOSITION, 
-	// programi perfundon
+	// if the second argument is not ENCRYPTTRANSPOSITION or DECRYPTTRANSPOSITION, the programs ends
 	if ((strcmp(argv[1], "ENCRYPTTRANSPOSITION") != 0 ) && (strcmp(argv[1], "DECRYPTTRANSPOSITION") != 0))
 	{
-						 
-		printf("Argumenti i dyte duhet te jete ENCRYPTTRANSPOSITION ose DECRYPTTRANSPOSITION\n");
+		printf("The second argument should be either ENCRYPTTRANSPOSITION or DECRYPTTRANSPOSITION\n");
 		exit(1);
 	}
 	
-	// verifikojme a ekziston file-i i cili eshte marre si parametri i dyte (argv[2])
+	// verify if the file exist 
 	FILE *inputFile;
 	if((inputFile = fopen( argv[2], "r+b" )) == NULL )
 	{
-		printf("File %s nuk mund te hapet apo nuk ekziston!\n", argv[2]);
+		printf("File %s could not be opened or does not exist!\n", argv[2]);
 		exit(1);		
 	}
-	// mbyllim file-in
+
 	fclose(inputFile);
-	// Nese argumenti i dyte eshte ENCRYPTTRANSPOSITION, atehere thirret funksioni encrypttranspos
+	// If the second argument is ENCRYPTTRANSPOSITION, function encrypttranspos is called
 	if (!strcmp(argv[1], "ENCRYPTTRANSPOSITION"))
 	{
 		if (encrypttranspos(inputFile, argv[2]))
 		{
-			printf("Kemi nje gabim ne enkriptim!\n");
+			printf("There has been an error in encryption!\n");
 			exit(1);
 		}
 	}
-	// Nese argumenti i dyte eshte DECRYPTCESAR, atehere thirret funksioni decryptCesar
+	// If the second parameter is DECRYPTTRANSPOSITION, function decrypttranspos is called
 	else if (!strcmp(argv[1], "DECRYPTTRANSPOSITION"))
 	{
 		if (decrypttranspos(inputFile, argv[2]))
 		{
-			printf("Kemi nje gabim ne decriptim!\n");
+			printf("There has been an error in decryption!\n");
 			exit(1);
 		}
 	}
@@ -68,61 +66,52 @@ int encrypttranspos(FILE *inputFile, char *FileName)
 {
 	char FileNameEncrypted[200], FileNameOnly[200];
 	char *Extension;
-
-	// Gjen paraqitjen e fundit te pikes ne emrin e file-it dhe rezultatin e ruan
-	// ne variablen Extension
+	// Finds the last apperance of the dot (.) in the filename
+	// and saves it into Extension variable
 	Extension = strrchr(FileName,'.');
 	Extension = strupr(Extension);
 
-	// nese variabla Extension eshte .ENC atehere ky funksion i kthehet funksionit main()
+	// if variable Extension is .ENC, the function returns 1
 	if (!strcmp(Extension, ".ENC"))
 	{
-		printf("File-i hyres duhet te mos kete ekstenzion .ENC!\n");
+		printf("The input file should not have extension .ENC!\n");
 		return 1;
 	}
 	
 	if((inputFile = fopen(FileName, "r+b" )) == NULL )
 	{
-		printf("File-i origjinal nuk mund te hapet\n");
+		printf("The original file could not be opened\n");
 		return 1;		
 	}
 
-	// kopjo karakteret prej variables FileName ne FileNameOnly. 
-	// Kopjimi behet vetem deri te 
-	// paraqitja e fundit e pikes ne variablen FileName
 	strncpy(FileNameOnly, FileName, Extension - FileName);
-
-	// variabla FileNameOnly perfundon me '\0'
 	FileNameOnly[Extension - FileName] = '\0';
-	// variabla FileNameEncrypted kopjon vetem emrin e file-it, por i shtohet edhe 
-	// ekstenzioni .ENC
+	// variable FileNameEncrypted copies file name appended by .ENC
 	sprintf(FileNameEncrypted, "%s.ENC", FileNameOnly);
 
 	FILE *EncryptedFile;
 	if ((EncryptedFile = fopen(FileNameEncrypted, "w+b")) == NULL)
 	{
-		printf("File-i i encryptuar nuk mund te hapet\n");
+		printf("The encrypted file could not be opened\n");
 		return 1;
 	}
 	int ch, i;
 	long position, fileSize;
-	// percakto madhesine e file-it
 	fseek(inputFile, 0, SEEK_END);
 	fileSize = ftell(inputFile);
 	for (i = 0; i < KEY; i++)
 	{
-		// zhvendos poziten e file-it prej fillimit + i (0, 1, 2, ...)
+		// move file pointer from the begining + i (0, 1, 2, ...)
 		fseek(inputFile, i, SEEK_SET);
 		while (!feof(inputFile))
 		{
 			ch = fgetc(inputFile);
 			fputc(ch, EncryptedFile);
-			// zhvendose pointerin e file-it per KEY - 1
+			// move file pointer for KEY - 1
 			fseek(inputFile, KEY - 1, SEEK_CUR);
-			// trego poziten e file-it
 			position = ftell(inputFile);
-			// ne rast se pozita e pointerit te file-it 
-			// eshte me e madhe se madhesia e file-it
+			// if the position of the pointer file is greater than 
+			// the file size, will break from while loop
 			if (position >= fileSize)
 			{
 				break;
@@ -130,7 +119,6 @@ int encrypttranspos(FILE *inputFile, char *FileName)
 		}
 		fputc(32, EncryptedFile);
 	}
-	// mbyllet file-i hyres dhe file-i i enkriptuar
 	fclose(inputFile);
 	fclose(EncryptedFile);
 	return 0;
@@ -142,17 +130,16 @@ int decrypttranspos(FILE *inputFile, char *FileNameEncrypted)
 	char *Extension;
 	Extension = strrchr(FileNameEncrypted,'.');
 	Extension = strupr(Extension);
-	// file-i hyres apo i enkriptuar duhet te kete ekstenzionin .ENC
-	// perndryshe funksioni perfundon
+	// input file must have extension .ENC
 	if (strcmp(Extension, ".ENC"))
 	{
-		printf("File-i hyres i enkriptuar duhet te kete ekstenzionin .ENC!\n");
+		printf("Input file should have extension .ENC!\n");
 		return 1;
 	}
 
 	if((inputFile = fopen(FileNameEncrypted, "r+b" )) == NULL )
 	{
-		printf("File-i i enkriptuar nuk mund te hapet\n");
+		printf("The encrypted file could not be opened\n");
 		return 1;		
 	}
 	
@@ -163,7 +150,7 @@ int decrypttranspos(FILE *inputFile, char *FileNameEncrypted)
 	FILE *DecryptedFile;
 	if ((DecryptedFile = fopen(FileNameDecrypted, "w+b")) == NULL)
 	{
-		printf("File-i i dekriptuar nuk mund te hapet\n");
+		printf("The decrypted file could not be opened\n");
 		return 1;
 	}
 	
@@ -171,21 +158,15 @@ int decrypttranspos(FILE *inputFile, char *FileNameEncrypted)
 	long position, fileSize;
 
 	fseek(inputFile, 0, SEEK_END);
-	// percakto madhesine e file-it hyres
 	fileSize = ftell(inputFile);
-	// percakto numrin e rreshtave ne matrice
 	long NumriRreshave = fileSize / KEY;
-	// Per tekstin e enkriptuar disa rreshta jane me
-	// te medha, e disa me te vogla
 	long ZhvendosjaPointeritFile;
 
 	for (i = 0; i < NumriRreshave; i++)
 	{
-		// zhvendos poziten e file-it prej fillimit + i (0, 1, 2, ...)
+		// move file pointer from the begining + i (0, 1, 2, ...)
 		fseek(inputFile, i, SEEK_SET);
-		// j percakton per sa duhet zhvendosur pointerin
-		// e file-it, varesisht sa eshte madhesia 
-		// e nje rreshti
+		// j determines for how much should be pointer moved
 		j = 0;
 		while (!feof(inputFile))
 		{
@@ -197,8 +178,6 @@ int decrypttranspos(FILE *inputFile, char *FileNameEncrypted)
 			else
 				ZhvendosjaPointeritFile = NumriRreshave;
 			fseek(inputFile, ZhvendosjaPointeritFile, SEEK_CUR);
-			// tregon poziten e pointerit te file-it
-			// ne pointer
 			position = ftell(inputFile);
 
 			if (position >= fileSize)
@@ -208,9 +187,8 @@ int decrypttranspos(FILE *inputFile, char *FileNameEncrypted)
 		}
 	}
 	fclose(DecryptedFile);
-	// ne fund kane mbetur disa zbraztesira ne file-in e 
-	// dekriptuar. Ato duhet te fshihen. Kete e bejme
-	// duke e zvogluar madhesine e file-it te enkriptuar
+	// there has been some blanks in the decrypted file . The blanks should be deleted .
+	// This can be done by reducing output filenkriptuar
 	int fh;
 	if( fh = _open( FileNameDecrypted, _O_RDWR )  != -1 )
 	{
