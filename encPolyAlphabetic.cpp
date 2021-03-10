@@ -1,22 +1,18 @@
-/* Shembull i shifrimit polialfabetik
-	Algoritmi i enkriptimit si file hyres e merr file-in origjinal
-	si text file, ndersa ne dalje fitohet file i enkriptuar
-	Ndersa algoritmi i dekriptimit si hyrje e merr file-in e enkriptuar 
-	dhe pas dekriptimit fitohet file-i i dekriptuar
-	File origjinal (si file hyres i algoritmit te enkriptuar) duhet te jete
-	i identik me file-in dales te dekriptuar (file-i dales i 
-	algoritmit te dekriptuar)
-	File i enkriptuar do te kete ekstenzionin .enc, ndersa 
-	file i dekriptuar do te kete ekstensionin .dcp
+/* Exapmle of polyalphabetic encryption
+	The encrypted file takes input file as a text file, whereas the encrypted file is created as output
+	The decrypted file takes input file as a encrypted file, whereas the decrypted file is created as output
 
-  	Sintaksa:	shembulli_26 encPolialfabetik inputFile 
-				shembulli_26 decPolialfabetik inputFile 
-	
-	Ketu shfrytezohet shifrimi polialfabetik per enkriptim/dekriptim
-	Dmth .	Simboli i pare	-> simboli->Rot(qelesi 1)
-			Simboli i dyte	-> simboli->Rot(qelesi 2)
-			Simboli i trete -> simboli->Rot(qelesi 3)
-			etj,
+  	Syntax:	encPolyAlphabetic encPolialfabetik inputFile 
+		encPolyAlphabetic decPolialfabetik inputFile 
+		
+	The encrypion is done as following:
+		First symbol -> symbol->Rot(key 1)
+		Second symbol -> symbol->Rot(key 2)
+		Third symbol -> symbol->Rot(key 3)
+		Forth symbol -> symbol->Rot(key 1)
+		Fifth symbol -> symbol->Rot(key 2)
+		Sixth symbol -> symbol->Rot(key 3)
+		etc...
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,84 +22,81 @@
 
 int *Qelesat;
 int NumriQelesave = 0;
-// funksioni i enkriptimit i cili si argumente hyrese ka pointerin ne FILE 
-// dhe emrin e datotekes. Ky funksion kthen 0 nese qdo gje perfundon ne rregull,
-// perndryshe nese ka ndonje gabim ky funksion kthen 1
+
+// The encryption function takes pointer of the file and file name as arguments.
+// If everything will be OK, it will return 0
+// If there is an error, the function returns 1
 int encPolialfabetik(FILE *inputFile, char *FileName);
 
-// funksioni i dekriptimit i cili si argumente hyrese ka pointerin ne FILE 
-// dhe emrin e datotekes. Ky funksion kthen 0 nese qdo gje perfundon ne rregull,
-// perndryshe nese ka ndonje gabim ky funksion kthen 1
+// The decryption function takes pointer of the file and file name as arguments.
+// If everything will be OK, it will return 0
+// If there is an error, the function returns 1
 int decPolialfabetik(FILE *inputFile, char *FileNameEncrypted);
 
 int CheckIfNumber();
 int main( int argc, char *argv[])
 {
-	// numri i argumenteve duhet te jete 3
+	// the number of arguments should be 3
 	if (argc != 3)
 	{
-		printf("Numri i argumenteve te dhena nga shfrytezuesi duhet te jete 3. \n");
-		printf("Sintaksa\t: shembulli_26 encPolialfabetik inputFile \n");
-		printf("ose\t\t: shembulli_26 decPolialfabetik inputFile\n");
+		printf("The number of arguments should be 3. \n");
+		printf("Syntax\t: encPolyAlphabetic encPolialfabetik inputFile \n");
+		printf("or\t\t: encPolyAlphabetic decPolialfabetik inputFile\n");
 		exit(1);
 	}
-	// argumentet 1 dhe 2 konvertohen ne shkronja te medha
 	argv[1] = strupr(argv[1]);
 	argv[2] = strupr(argv[2]);
 
-	// nese argumenti i dyte nuk eshte ENCPOLIALFABETIK ose DECPOLIALFABETIK, 
-	// programi perfundon
+	// if the second argument is not ENCPOLIALFABETIK or DECPOLIALFABETIK, 
+	// the program will terminate
 	if ((strcmp(argv[1], "ENCPOLIALFABETIK") != 0 ) && (strcmp(argv[1], "DECPOLIALFABETIK") != 0))
 	{
-		printf("Argumenti i dyte duhet te jete ENCPOLIALFABETIK ose DECPOLIALFABETIK\n");
+		printf("The second argument should be either ENCPOLIALFABETIK or DECPOLIALFABETIK\n");
 		exit(1);
 	}
 	
-	// verifikojme a ekziston datoteka e cila eshte marre si parametri i dyte (argv[2])
+	// verify if the file exists as second parameter
 	FILE *inputFile;
 	if((inputFile = fopen( argv[2], "r+b" )) == NULL )
 	{
-		printf("Datoteka %s nuk mund te hapet apo nuk ekziston!\n", argv[2]);
+		printf("File %s does not exist or could not be opened!!\n", argv[2]);
 		exit(1);		
 	}
 	long position, fileSize;
-	// percakto madhesine e file-it
 	fseek(inputFile, 0, SEEK_END);
 	fileSize = ftell(inputFile);
-
-	// mbyllim datoteken
 	fclose(inputFile);
 	
-	printf("Numri i qelesave: ");
+	printf("Number of keys: ");
 	NumriQelesave = CheckIfNumber(); 
 
-	// krijon qelesat dinamikisht, varesisht nga variabla NumriQelesave
+	// The keys are created dynamically, depending on variable NumriQelesave
 	Qelesat	= new int[NumriQelesave];
 	for (int i = 0; i < NumriQelesave; i++)
 	{
-		printf("\nQelesi %d: ", i);
+		printf("\Key %d: ", i);
 		Qelesat[i] = CheckIfNumber(); 
 		if (Qelesat[i]  > 26 || Qelesat[i] == 0)
 		{
-			printf("\nQelesi %d duhet te kete vlera prej 1-26!!", i);
+			printf("\Key %d should be from 1-26!!", i);
 			i--;
 		}
 	}
-	// Nese argumenti i dyte eshte ENCPOLIALFABETIK, atehere thirret funksioni encPolialfabetik
+	// If the second argument is ENCPOLIALFABETIK, then function encPolialfabetik is called
 	if (!strcmp(argv[1], "ENCPOLIALFABETIK"))
 	{
 		if (encPolialfabetik(inputFile, argv[2]))
 		{
-			printf("Kemi nje gabim ne enkriptim!\n");
+			printf("There was an error in ecryption!\n");
 			exit(1);
 		}
 	}
-	// Nese argumenti i dyte eshte DECPOLIALFABETIK, atehere thirret funksioni decPolialfabetik
+	// If the second argument is DECPOLIALFABETIK, then function decPolialfabetik is called
 	else if (!strcmp(argv[1], "DECPOLIALFABETIK"))
 	{
 		if (decPolialfabetik(inputFile, argv[2]))
 		{
-			printf("Kemi nje gabim ne decriptim!\n");
+			printf("There was an error in decryption!\n");
 			exit(1);
 		}
 	}
@@ -115,46 +108,38 @@ int encPolialfabetik(FILE *inputFile, char *FileName)
 {
 	char FileNameEncrypted[200], FileNameOnly[200];
 	char *Extension;
-	// Gjen paraqitjen e fundit te pikes ne emrin e datotekes dhe rezultatin e ruan
-	// ne variablen Extension
+	// Finds the last apperance of the dot (.) in the filename
+	// and saves it into Extension variable	Extension = strrchr(FileName,'.');
 	Extension = strrchr(FileName,'.');
 	Extension = strupr(Extension);
 
-	// nese variabla Extension eshte .ENC atehere ky funksion i kthehet funksionit main()
+	// if variable Extension is .ENC, then will return to main()
 	if (!strcmp(Extension, ".ENC"))
 	{
-		printf("Datoteka hyrese duhet te mos kete ekstenzion .ENC!\n");
+		printf("Input file should not have extension .ENC!\n");
 		return 1;
 	}
 	
 	if((inputFile = fopen(FileName, "r+b" )) == NULL )
 	{
-		printf("Datoteka origjinale nuk mund te hapet\n");
+		printf("The original file could not be opeened\n");
 		return 1;		
 	}
 
-	// kopjo karakteret prej variables FileName ne FileNameOnly. 
-	// Kopjimi behet vetem deri te 
-	// paraqitja e fundit e pikes ne variablen FileName
 	strncpy(FileNameOnly, FileName, Extension - FileName);
-
-	// variabla FileNameOnly perfundon me '\0'
 	FileNameOnly[Extension - FileName] = '\0';
-	// variabla FileNameEncrypted kopjon vetem emrin e datotekes, por i shtohet edhe 
-	// ekstenzioni .ENC
 	sprintf(FileNameEncrypted, "%s.ENC", FileNameOnly);
 
 	FILE *EncryptedFile;
 	if ((EncryptedFile = fopen(FileNameEncrypted, "w+b")) == NULL)
 	{
-		printf("Datoteka e encryptuar nuk mund te hapet\n");
+		printf("Encrypted file could not be opened\n");
 		return 1;
 	}
-
-	// ch eshte karakteri i datotekes hyrese
-	// ch1 eshte karakteri i enkriptuar
-	// ReadCh eshte karakteri me rend i lexuar % Numri i Qelesave.
-	// dmth. nese NumriQelesave eshte 4, ReadCh mund te kete vlerat 0,1,2,3
+	// ch - character of the input file
+	// ch1 - encrypted character
+	// ReadCh is read character % Number of keys
+	// i.e. if NumriQelesave is 4, ReadCh mund te kete vlerat 0,1,2,3
 	int ch, ch1, ReadCh;
 	ReadCh = 0;
 	
@@ -163,7 +148,6 @@ int encPolialfabetik(FILE *inputFile, char *FileName)
 		ch = fgetc(inputFile);
 		if (ch != EOF)
 		{
-			// nese karakteri i lexuar i datotekes eshte shkronje
 			if (isalpha(ch))
 			{
 				if (isupper(ch))
@@ -181,11 +165,9 @@ int encPolialfabetik(FILE *inputFile, char *FileName)
 			{
 				ch1 = ch;
 			}
-			// shkruaj ne datoteken dalese
 			fputc(ch1, EncryptedFile);
 		}
 	}
-	// mbyllet datoteken hyrese dhe datoteken e enkriptuar
 	fclose(inputFile);
 	fclose(EncryptedFile);
 
@@ -198,17 +180,16 @@ int decPolialfabetik(FILE *inputFile, char *FileNameEncrypted)
 	char *Extension;
 	Extension = strrchr(FileNameEncrypted,'.');
 	Extension = strupr(Extension);
-	// datoteka hyrese apo e enkriptuar duhet te kete ekstenzionin .ENC
-	// perndryshe funksioni perfundon
+	// input file should have extension .ENC, otherwise it return 1
 	if (strcmp(Extension, ".ENC"))
 	{
-		printf("Datoteka hyrese e enkriptuar duhet te kete ekstenzionin .ENC!\n");
+		printf("Input file should have extension .ENC!\n");
 		return 1;
 	}
 
 	if((inputFile = fopen(FileNameEncrypted, "r+b" )) == NULL )
 	{
-		printf("Datoteka e enkriptuar nuk mund te hapet\n");
+		printf("Encrypted file could not be opened\n");
 		return 1;		
 	}
 	
@@ -219,10 +200,10 @@ int decPolialfabetik(FILE *inputFile, char *FileNameEncrypted)
 	FILE *DecryptedFile;
 	if ((DecryptedFile = fopen(FileNameDecrypted, "w+b")) == NULL)
 	{
-		printf("Datoteka e dekriptuar nuk mund te hapet\n");
+		printf("Decrypted file could not be opeend\n");
 		return 1;
 	}
-	// ch- karakteri hyres, ch1- karakteri i dekriptuar
+	// ch- input character, ch1- decrypted character
 	int ch, ch1, ReadCh;
 	ReadCh = 0;
 	while (!feof(inputFile))
