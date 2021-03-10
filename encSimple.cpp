@@ -5,80 +5,76 @@
 #include <conio.h>
 
 int key;
-// funksioni i enkriptimit i cili si argumente hyrese ka pointerin ne FILE 
-// dhe emrin e datotekes. Ky funksion kthen 0 nese qdo gje perfundon ne rregull,
-// perndryshe nese ka ndonje gabim ky funksion kthen 1
+// The encryping fucntion takes pointer of the FILE and name of the file as the arguments.
+// If the function returns 0, everything is OK,
+// Otherwise if an error occurs, the function returns 1
 int encZevdThjeshte(FILE *inputFile, char *FileName);
 
-// funksioni i dekriptimit i cili si argumente hyrese ka pointerin ne FILE 
-// dhe emrin e datotekes. Ky funksion kthen 0 nese qdo gje perfundon ne rregull,
-// perndryshe nese ka ndonje gabim ky funksion kthen 1
+// The decrypting fucntion takes pointer of the FILE and name of the file as the arguments.
+// If the function returns 0, everything is OK,
+// Otherwise if an error occurs, the function returns 1
 int decZevdThjeshte(FILE *inputFile, char *FileNameEncrypted);
 
 int main( int argc, char *argv[])
 {
-	// numri i argumenteve duhet te jete 4
+	// the number of arguments should be 4
 	if (argc != 4)
 	{
-		printf("Numri i argumenteve te dhena nga shfrytezuesi duhet te jete 4. \n");
-		printf("Sintaksa\t: shembulli_25 encZevdThjeshte inputFile qelesi\n");
-		printf("ose\t\t: shembulli_25 decZevdThjeshte inputFile qelesi\n");
+		printf("Number of arguments should be 4. \n");
+		printf("Syntax\t: encSimple encZevdThjeshte inputFile key\n");
+		printf("or\t\t: encSimple decZevdThjeshte inputFile key\n");
 		exit(1);
 	}
-	// argumentet 1 dhe 2 konvertohen ne shkronja te medha
 	argv[1] = strupr(argv[1]);
 	argv[2] = strupr(argv[2]);
-
-	// nese argumenti i dyte nuk eshte ENCZEVDTHJESHTE ose DECZEVDTHJESHTE, 
-	// programi perfundon
+	// if the second argument is not ENCZEVDTHJESHTE or DECZEVDTHJESHTE, the programs ends
 	if ((strcmp(argv[1], "ENCZEVDTHJESHTE") != 0 ) && (strcmp(argv[1], "DECZEVDTHJESHTE") != 0))
 	{
-		printf("Argumenti i dyte duhet te jete ENCZEVDTHJESHTE ose DECZEVDTHJESHTE\n");
+		printf("The second parameter should be either ENCZEVDTHJESHTE or DECZEVDTHJESHTE\n");
 		exit(1);
 	}
 	
-	// verifikojme a ekziston datoteka e cila eshte marre si parametri i dyte (argv[2])
+	// verify if the file exist 
 	FILE *inputFile;
 	if((inputFile = fopen( argv[2], "r+b" )) == NULL )
 	{
-		printf("Datoteka %s nuk mund te hapet apo nuk ekziston!\n", argv[2]);
+		printf("File %s could not be opened!\n", argv[2]);
 		exit(1);		
 	}
-	// mbyllim datoteken
 	fclose(inputFile);
 	unsigned int i;
-	// verifiko a eshte argumenti i katert numer
-	// e nese nuk eshte numer, atehere pason dalja nga programi
+	// Check if the forth argument is number.
+	// If it is not a number, the program ends.
 	for (i = 0; i < strlen(argv[3]); i++)
 	{
 		if (!isdigit(argv[3][i]))
 		{
-			printf("Argumenti i katert duhet te jete numer\n");
+			printf("The forth argument should be a number\n");
  			exit(1);
 		}
 	}
-	// ekstrakto qelesin nga argumenti i katert
+	// Extract key from the forth argument
 	sscanf(argv[3], "%d", &key);
 	if (key > 26 || key == 0)
 	{
-		printf("Argumenti i katert duhet te kete vlera prej 1-26\n");
+		printf("The forth argument should have values from 1-26\n");
 		return 0;
 	}
-	// Nese argumenti i dyte eshte ENCZEVDTHJESHTE, atehere thirret funksioni encZevdThjeshte
+	// If the second argument is ENCZEVDTHJESHTE, the function encZevdThjeshte is called
 	if (!strcmp(argv[1], "ENCZEVDTHJESHTE"))
 	{
 		if (encZevdThjeshte(inputFile, argv[2]))
 		{
-			printf("Kemi nje gabim ne enkriptim!\n");
+			printf("There has been an error in encryption!\n");
 			exit(1);
 		}
 	}
-	// Nese argumenti i dyte eshte DECZEVDTHJESHTE, atehere thirret funksioni decZevdThjeshte
+	// If the second argument is DECZEVDTHJESHTE,  the function decZevdThjeshte is called
 	else if (!strcmp(argv[1], "DECZEVDTHJESHTE"))
 	{
 		if (decZevdThjeshte(inputFile, argv[2]))
 		{
-			printf("Kemi nje gabim ne decriptim!\n");
+			printf("There has been an error in decryption!\n");
 			exit(1);
 		}
 	}
@@ -90,50 +86,43 @@ int encZevdThjeshte(FILE *inputFile, char *FileName)
 {
 	char FileNameEncrypted[200], FileNameOnly[200];
 	char *Extension;
-	// Gjen paraqitjen e fundit te pikes ne emrin e datotekes dhe rezultatin e ruan
-	// ne variablen Extension
+	// Finds the last apperance of the dot (.) in the filename
+	// and saves it into Extension variable
 	Extension = strrchr(FileName,'.');
 	Extension = strupr(Extension);
 
-	// nese variabla Extension eshte .ENC atehere ky funksion i kthehet funksionit main()
+	// if variable Extension is .ENC, the function returns 1
 	if (!strcmp(Extension, ".ENC"))
 	{
-		printf("Datoteka hyrese duhet te mos kete ekstenzion .ENC!\n");
+		printf("The input file extension should not be .ENC!\n");
 		return 1;
 	}
 	
 	if((inputFile = fopen(FileName, "r+b" )) == NULL )
 	{
-		printf("Datoteka origjinale nuk mund te hapet\n");
+		printf("The original file could not be opened\n");
 		return 1;		
 	}
 
-	// kopjo karakteret prej variables FileName ne FileNameOnly. 
-	// Kopjimi behet vetem deri te 
-	// paraqitja e fundit e pikes ne variablen FileName
 	strncpy(FileNameOnly, FileName, Extension - FileName);
-
-	// variabla FileNameOnly perfundon me '\0'
 	FileNameOnly[Extension - FileName] = '\0';
-	// variabla FileNameEncrypted kopjon vetem emrin e datotekes, por i shtohet edhe 
-	// ekstenzioni .ENC
 	sprintf(FileNameEncrypted, "%s.ENC", FileNameOnly);
 
 	FILE *EncryptedFile;
 	if ((EncryptedFile = fopen(FileNameEncrypted, "w+b")) == NULL)
 	{
-		printf("Datoteka e encryptuar nuk mund te hapet\n");
+		printf("The encrypted file could not be opened\n");
 		return 1;
 	}
-	// ch eshte karakteri i datotekes hyrese
-	// ch1 eshte karakteri i enkriptuar
+	// ch is the character of the input file 
+	// ch1 is the character of the encrypted file 
 	int ch, ch1;
 	while (!feof(inputFile))
 	{
 		ch = fgetc(inputFile);
 		if (ch != EOF)
 		{
-			// nese karakteri i lexuar i datotekes eshte shkronje
+			// if the read symbol from the file is a character
 			if (isalpha(ch))
 			{
 				if (isupper(ch))
@@ -145,11 +134,9 @@ int encZevdThjeshte(FILE *inputFile, char *FileName)
 			{
 				ch1 = ch;
 			}
-			// shkruaj ne datoteken dalese
 			fputc(ch1, EncryptedFile);
 		}
 	}
-	// mbyllet datoteken hyrese dhe datoteken e enkriptuar
 	fclose(inputFile);
 	fclose(EncryptedFile);
 
@@ -162,17 +149,16 @@ int decZevdThjeshte(FILE *inputFile, char *FileNameEncrypted)
 	char *Extension;
 	Extension = strrchr(FileNameEncrypted,'.');
 	Extension = strupr(Extension);
-	// datoteka hyrese apo e enkriptuar duhet te kete ekstenzionin .ENC
-	// perndryshe funksioni perfundon
+	// input file must have extension .ENC
 	if (strcmp(Extension, ".ENC"))
 	{
-		printf("Datoteka hyrese e enkriptuar duhet te kete ekstenzionin .ENC!\n");
+		printf("The input file should have extension .ENC!\n");
 		return 1;
 	}
 
 	if((inputFile = fopen(FileNameEncrypted, "r+b" )) == NULL )
 	{
-		printf("Datoteka e enkriptuar nuk mund te hapet\n");
+		printf("The encrypted file could not be opened\n");
 		return 1;		
 	}
 	
@@ -183,10 +169,10 @@ int decZevdThjeshte(FILE *inputFile, char *FileNameEncrypted)
 	FILE *DecryptedFile;
 	if ((DecryptedFile = fopen(FileNameDecrypted, "w+b")) == NULL)
 	{
-		printf("Datoteka e dekriptuar nuk mund te hapet\n");
+		printf("The decrypted file could not be opened\n");
 		return 1;
 	}
-	// ch- karakteri hyres, ch1- karakteri i dekriptuar
+	// ch- input character, ch1- decrypted character
 	int ch, ch1;
 	while (!feof(inputFile))
 	{
