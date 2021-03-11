@@ -1,5 +1,5 @@
 # cryptographySamples
-Find some C++ files regarding implementing basic encryption and cryptography. There were part of the lectures in "Information security" that was organised from 2004-2010 in University of Prishtina, Kosovo
+These are some C++ files regarding implementing basic encryption and cryptography algorithms. There were part of the lectures in "Information security" that was organised from 2004-2010 in University of Prishtina, Kosovo
 
 These .cpp files are command-line based.
 
